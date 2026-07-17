@@ -12,9 +12,10 @@ const nav: { id: PageId; label: string; icon: typeof IconGrid }[] = [
 interface Props {
   active: PageId
   onNavigate: (page: PageId) => void
+  onLogout?: () => void
 }
 
-export function Sidebar({ active, onNavigate }: Props) {
+export function Sidebar({ active, onNavigate, onLogout }: Props) {
   return (
     <aside className="sidebar">
       <div className="sidebar-logo">
@@ -37,6 +38,11 @@ export function Sidebar({ active, onNavigate }: Props) {
           )
         })}
       </nav>
+      {onLogout && (
+        <button type="button" className="sidebar-logout" onClick={onLogout}>
+          Log out
+        </button>
+      )}
     </aside>
   )
 }

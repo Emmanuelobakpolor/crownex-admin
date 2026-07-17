@@ -2,9 +2,10 @@ import { IconBell, IconChevronLeft, IconSearch } from './Icons'
 
 interface Props {
   showRateField?: boolean
+  adminEmail?: string
 }
 
-export function Header({ showRateField = false }: Props) {
+export function Header({ showRateField = false, adminEmail = 'letszz@gmail.com' }: Props) {
   return (
     <header className="top-header">
       <div className="header-left">
@@ -39,7 +40,7 @@ export function Header({ showRateField = false }: Props) {
           />
           <div className="admin-meta">
             <span className="admin-label">ADMIN</span>
-            <span className="admin-email">letszz@gmail.com</span>
+            <span className="admin-email">{adminEmail}</span>
           </div>
         </div>
       </div>
