@@ -72,3 +72,89 @@ export interface PaginatedTransactions {
   page_size: number
   results: AdminTransaction[]
 }
+
+export type CryptoFeeType = 'buy' | 'sell' | 'swap' | 'withdraw'
+
+export interface CryptoFeeSetting {
+  id: number
+  fee_type: CryptoFeeType
+  flat_usd: string
+  percent: string
+  is_active: boolean
+  updated_at: string
+}
+
+export type CryptoOrderType = 'buy' | 'sell' | 'swap'
+
+export type CryptoOrderStatus =
+  | 'pending_payment'
+  | 'payment_received'
+  | 'waiting_deposit'
+  | 'processing'
+  | 'completed'
+  | 'failed'
+
+export interface CryptoLogEntry {
+  event: string
+  detail: string
+  created_at: string
+}
+
+export interface AdminCryptoOrder {
+  id: string
+  reference: string
+  user_email: string
+  order_type: CryptoOrderType
+  coin: string
+  to_coin: string
+  coin_amount: string
+  to_coin_amount: string | null
+  rate_ngn: string
+  to_rate_ngn: string | null
+  fee_ngn: string
+  total_ngn: string
+  status: CryptoOrderStatus
+  quidax_order_id: string
+  payment_proof: string | null
+  note: string
+  created_at: string
+  updated_at: string
+  logs: CryptoLogEntry[]
+}
+
+export interface PaginatedCryptoOrders {
+  count: number
+  page: number
+  page_size: number
+  num_pages: number
+  results: AdminCryptoOrder[]
+}
+
+export type CryptoWithdrawalStatus = 'processing' | 'completed' | 'failed' | 'rejected'
+
+export interface AdminCryptoWithdrawal {
+  id: string
+  reference: string
+  user_email: string
+  coin: string
+  network: string
+  address: string
+  amount: string
+  fee_coin: string
+  net_amount: string
+  status: CryptoWithdrawalStatus
+  quidax_withdrawal_id: string
+  tx_id: string
+  note: string
+  created_at: string
+  updated_at: string
+  logs: CryptoLogEntry[]
+}
+
+export interface PaginatedCryptoWithdrawals {
+  count: number
+  page: number
+  page_size: number
+  num_pages: number
+  results: AdminCryptoWithdrawal[]
+}

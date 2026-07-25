@@ -1,136 +1,169 @@
-import { useState } from 'react'
-import { IconClose, IconPercent } from '../components/Icons'
+import { useEffect, useState } from 'react'
+import { fetchCryptoFees, updateCryptoFee } from '../api/adminApi'
+import { ApiError } from '../api/client'
+import type { CryptoFeeSetting, CryptoFeeType } from '../api/types'
+import { IconPercent } from '../components/Icons'
+
+const FEE_LABELS: Record<CryptoFeeType, { title: string; desc: string }> = {
+  buy: { title: 'Buy fee', desc: "Added on top of the crypto's NGN value." },
+  sell: { title: 'Sell fee', desc: 'Deducted from the NGN payout.' },
+  swap: {
+    title: 'Swap fee',
+    desc: 'Deducted from the notional before converting to the destination coin.',
+  },
+  withdraw: { title: 'Withdraw fee', desc: 'Deducted from the withdrawn amount, same coin.' },
+}
+
+interface Draft {
+  flat_usd: string
+  percent: string
+}
+
+type SaveMessage = { type: 'ok' | 'err'; text: string }
 
 export function Fees() {
-  const [swapFee, setSwapFee] = useState('10')
-  const [depositFlat, setDepositFlat] = useState('10')
-  const [depositPct, setDepositPct] = useState('1')
-  const [withdrawFlat, setWithdrawFlat] = useState('10')
-  const [withdrawPct, setWithdrawPct] = useState('1')
+  const [fees, setFees] = useState<CryptoFeeSetting[]>([])
+  const [drafts, setDrafts] = useState<Record<number, Draft>>({})
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [savingId, setSavingId] = useState<number | null>(null)
+  const [messages, setMessages] = useState<Record<number, SaveMessage>>({})
+
+  useEffect(() => {
+    fetchCryptoFees()
+      .then((rows) => {
+        setFees(rows)
+        setDrafts(
+          Object.fromEntries(rows.map((row) => [row.id, { flat_usd: row.flat_usd, percent: row.percent }])),
+        )
+      })
+      .catch((err: unknown) => {
+        setError(err instanceof ApiError ? err.message : 'Failed to load fees.')
+      })
+      .finally(() => setLoading(false))
+  }, [])
+
+  function updateDraft(id: number, field: keyof Draft, value: string) {
+    setDrafts((prev) => ({ ...prev, [id]: { ...prev[id], [field]: value } }))
+  }
+
+  async function handleSave(row: CryptoFeeSetting) {
+    const draft = drafts[row.id]
+    setSavingId(row.id)
+    setMessages((prev) => {
+      const next = { ...prev }
+      delete next[row.id]
+      return next
+    })
+
+    try {
+      const updated = await updateCryptoFee(row.id, {
+        flat_usd: draft.flat_usd,
+        percent: draft.percent,
+      })
+      setFees((prev) => prev.map((f) => (f.id === row.id ? updated : f)))
+      setMessages((prev) => ({ ...prev, [row.id]: { type: 'ok', text: 'Saved.' } }))
+    } catch (err) {
+      setMessages((prev) => ({
+        ...prev,
+        [row.id]: { type: 'err', text: err instanceof ApiError ? err.message : 'Failed to save.' },
+      }))
+    } finally {
+      setSavingId(null)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="fees-page">
+        <p className="cell-muted">Loading fees…</p>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="fees-page">
+        <p className="login-error">{error}</p>
+      </div>
+    )
+  }
 
   return (
     <div className="fees-page">
       <div className="page-intro fees-intro">
-        <h1>App fees</h1>
-        <p>Configure platform fees for swaps, deposits and withdrawals.</p>
+        <h1>Crypto fees</h1>
+        <p>
+          Configure platform fees for buy, sell, swap and withdraw. Changes apply to the next
+          quote a user requests — quotes already in flight keep their locked fee.
+        </p>
       </div>
 
       <div className="fees-grid">
-        <section className="card fee-panel">
-          <div className="fee-panel-header">
-            <h3>Swap fee</h3>
-            <button type="button" className="fee-close" aria-label="Close">
-              <IconClose />
-            </button>
-          </div>
-          <div className="fee-inner-card">
-            <div className="fee-inner-top">
-              <span className="fee-pct-icon">
-                <IconPercent />
-              </span>
-              <div>
-                <p className="fee-title">Swap Fee</p>
-                <p className="fee-desc">Charged per swap on notional value</p>
-              </div>
-            </div>
-            <div className="fee-input-row">
-              <input
-                type="text"
-                value={swapFee}
-                onChange={(e) => setSwapFee(e.target.value)}
-                aria-label="Swap fee percent"
-              />
-              <span className="fee-suffix">%</span>
-            </div>
-          </div>
-          <button type="button" className="add-charge-btn" disabled>
-            Add Withdrawal Charge
-          </button>
-        </section>
+        {fees.map((row) => {
+          const draft = drafts[row.id] ?? { flat_usd: row.flat_usd, percent: row.percent }
+          const label = FEE_LABELS[row.fee_type]
+          const message = messages[row.id]
 
-        <section className="card fee-panel">
-          <div className="fee-panel-header">
-            <h3>Deposit fee</h3>
-            <button type="button" className="fee-close" aria-label="Close">
-              <IconClose />
-            </button>
-          </div>
-          <div className="fee-inner-card">
-            <div className="fee-inner-top">
-              <span className="fee-pct-icon">
-                <IconPercent />
-              </span>
-              <div>
-                <p className="fee-title">Deposit fee</p>
-                <p className="fee-desc">Flat Network fee plus a percentage.</p>
+          return (
+            <section className="card fee-panel" key={row.id}>
+              <div className="fee-panel-header">
+                <h3>{label.title}</h3>
               </div>
-            </div>
-            <label className="field-label">Flat (USD)</label>
-            <div className="fee-input-row plain">
-              <input
-                type="text"
-                value={depositFlat}
-                onChange={(e) => setDepositFlat(e.target.value)}
-                aria-label="Deposit flat fee USD"
-              />
-            </div>
-            <label className="field-label">Flat (USD)</label>
-            <div className="fee-input-row">
-              <input
-                type="text"
-                value={depositPct}
-                onChange={(e) => setDepositPct(e.target.value)}
-                aria-label="Deposit fee percent"
-              />
-              <span className="fee-suffix">%</span>
-            </div>
-          </div>
-          <button type="button" className="add-charge-btn" disabled>
-            Add Withdrawal Charge
-          </button>
-        </section>
+              <div className="fee-inner-card">
+                <div className="fee-inner-top">
+                  <span className="fee-pct-icon">
+                    <IconPercent />
+                  </span>
+                  <div>
+                    <p className="fee-title">{label.title}</p>
+                    <p className="fee-desc">{label.desc}</p>
+                  </div>
+                </div>
 
-        <section className="card fee-panel fee-panel-wide">
-          <div className="fee-panel-header">
-            <h3>Withdrawal fee</h3>
-            <button type="button" className="fee-close" aria-label="Close">
-              <IconClose />
-            </button>
-          </div>
-          <div className="fee-inner-card">
-            <div className="fee-inner-top">
-              <span className="fee-pct-icon">
-                <IconPercent />
-              </span>
-              <div>
-                <p className="fee-title">Withdrawal fee</p>
-                <p className="fee-desc">Flat Network fee plus a percentage.</p>
+                <label className="field-label" htmlFor={`flat-${row.id}`}>
+                  Flat fee (USD)
+                </label>
+                <div className="fee-input-row plain">
+                  <input
+                    id={`flat-${row.id}`}
+                    type="text"
+                    inputMode="decimal"
+                    value={draft.flat_usd}
+                    onChange={(e) => updateDraft(row.id, 'flat_usd', e.target.value)}
+                  />
+                </div>
+
+                <label className="field-label" htmlFor={`pct-${row.id}`}>
+                  Percentage
+                </label>
+                <div className="fee-input-row">
+                  <input
+                    id={`pct-${row.id}`}
+                    type="text"
+                    inputMode="decimal"
+                    value={draft.percent}
+                    onChange={(e) => updateDraft(row.id, 'percent', e.target.value)}
+                  />
+                  <span className="fee-suffix">%</span>
+                </div>
               </div>
-            </div>
-            <label className="field-label">Flat (USD)</label>
-            <div className="fee-input-row plain">
-              <input
-                type="text"
-                value={withdrawFlat}
-                onChange={(e) => setWithdrawFlat(e.target.value)}
-                aria-label="Withdrawal flat fee USD"
-              />
-            </div>
-            <label className="field-label">Flat (USD)</label>
-            <div className="fee-input-row">
-              <input
-                type="text"
-                value={withdrawPct}
-                onChange={(e) => setWithdrawPct(e.target.value)}
-                aria-label="Withdrawal fee percent"
-              />
-              <span className="fee-suffix">%</span>
-            </div>
-          </div>
-          <button type="button" className="add-charge-btn" disabled>
-            Add Withdrawal Charge
-          </button>
-        </section>
+
+              {message && (
+                <p className={`settings-msg settings-msg-${message.type}`}>{message.text}</p>
+              )}
+
+              <button
+                type="button"
+                className="settings-submit"
+                disabled={savingId === row.id}
+                onClick={() => handleSave(row)}
+              >
+                {savingId === row.id ? 'Saving…' : 'Save changes'}
+              </button>
+            </section>
+          )
+        })}
       </div>
     </div>
   )
