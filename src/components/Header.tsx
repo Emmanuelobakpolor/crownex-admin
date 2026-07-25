@@ -32,7 +32,7 @@ export function Header({ showRateField = false, adminEmail = 'letszz@gmail.com' 
         </button>
         <div className="admin-profile">
           <img
-            src="https://randomuser.me/api/portraits/men/32.jpg"
+            src="/logo.png"
             alt="Admin"
             className="admin-avatar"
             width={36}
