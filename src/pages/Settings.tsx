@@ -117,7 +117,7 @@ export function Settings({ admin, onProfileUpdated }: Props) {
 
       <div className="settings-profile-card card">
         <img
-          src="https://randomuser.me/api/portraits/men/32.jpg"
+          src="/logo.png"
           alt="Admin"
           className="settings-avatar"
           width={64}
