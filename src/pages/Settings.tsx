@@ -1,8 +1,15 @@
 import { useState, type FormEvent } from 'react'
+import { changePassword, updateProfile } from '../api/adminApi'
+import type { AdminInfo } from '../api/client'
+import { ApiError, getStoredAuth, setStoredAuth } from '../api/client'
 import { IconEye, IconEyeOff, IconLock, IconMail } from '../components/Icons'
 
-export function Settings() {
-  const [email, setEmail] = useState('letszz@gmail.com')
+interface Props {
+  admin: AdminInfo | null
+  onProfileUpdated: (admin: AdminInfo) => void
+}
+
+export function Settings({ admin, onProfileUpdated }: Props) {
   const [newEmail, setNewEmail] = useState('')
   const [emailPassword, setEmailPassword] = useState('')
   const [currentPassword, setCurrentPassword] = useState('')
@@ -14,6 +21,9 @@ export function Settings() {
   const [showNew, setShowNew] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
 
+  const [emailLoading, setEmailLoading] = useState(false)
+  const [passwordLoading, setPasswordLoading] = useState(false)
+
   const [emailMessage, setEmailMessage] = useState<{ type: 'ok' | 'err'; text: string } | null>(
     null,
   )
@@ -22,7 +32,7 @@ export function Settings() {
     text: string
   } | null>(null)
 
-  function handleEmailSubmit(e: FormEvent) {
+  async function handleEmailSubmit(e: FormEvent) {
     e.preventDefault()
     setEmailMessage(null)
 
@@ -30,26 +40,37 @@ export function Settings() {
       setEmailMessage({ type: 'err', text: 'Please enter a new email address.' })
       return
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail.trim())) {
-      setEmailMessage({ type: 'err', text: 'Please enter a valid email address.' })
-      return
-    }
-    if (newEmail.trim().toLowerCase() === email.toLowerCase()) {
-      setEmailMessage({ type: 'err', text: 'New email must be different from the current one.' })
-      return
-    }
     if (!emailPassword) {
       setEmailMessage({ type: 'err', text: 'Enter your current password to confirm.' })
       return
     }
 
-    setEmail(newEmail.trim())
-    setNewEmail('')
-    setEmailPassword('')
-    setEmailMessage({ type: 'ok', text: 'Email updated successfully (frontend only).' })
+    setEmailLoading(true)
+    try {
+      const result = await updateProfile({
+        new_email: newEmail.trim(),
+        current_password: emailPassword,
+      })
+      const stored = getStoredAuth()
+      if (stored) {
+        const updatedAdmin: AdminInfo = { ...stored.admin, email: result.email }
+        setStoredAuth({ ...stored, admin: updatedAdmin })
+        onProfileUpdated(updatedAdmin)
+      }
+      setNewEmail('')
+      setEmailPassword('')
+      setEmailMessage({ type: 'ok', text: 'Email updated successfully.' })
+    } catch (err) {
+      setEmailMessage({
+        type: 'err',
+        text: err instanceof ApiError ? err.message : 'Failed to update email.',
+      })
+    } finally {
+      setEmailLoading(false)
+    }
   }
 
-  function handlePasswordSubmit(e: FormEvent) {
+  async function handlePasswordSubmit(e: FormEvent) {
     e.preventDefault()
     setPasswordMessage(null)
 
@@ -65,18 +86,26 @@ export function Settings() {
       setPasswordMessage({ type: 'err', text: 'New password and confirmation do not match.' })
       return
     }
-    if (newPassword === currentPassword) {
+
+    setPasswordLoading(true)
+    try {
+      await changePassword({
+        current_password: currentPassword,
+        new_password: newPassword,
+        new_password_confirm: confirmPassword,
+      })
+      setCurrentPassword('')
+      setNewPassword('')
+      setConfirmPassword('')
+      setPasswordMessage({ type: 'ok', text: 'Password updated successfully.' })
+    } catch (err) {
       setPasswordMessage({
         type: 'err',
-        text: 'New password must be different from the current one.',
+        text: err instanceof ApiError ? err.message : 'Failed to update password.',
       })
-      return
+    } finally {
+      setPasswordLoading(false)
     }
-
-    setCurrentPassword('')
-    setNewPassword('')
-    setConfirmPassword('')
-    setPasswordMessage({ type: 'ok', text: 'Password updated successfully (frontend only).' })
   }
 
   return (
@@ -96,7 +125,7 @@ export function Settings() {
         />
         <div>
           <p className="settings-role">ADMIN</p>
-          <p className="settings-current-email">{email}</p>
+          <p className="settings-current-email">{admin?.email ?? '—'}</p>
         </div>
       </div>
 
@@ -117,7 +146,7 @@ export function Settings() {
               Current email
             </label>
             <div className="fee-input-row plain">
-              <input id="current-email" type="email" value={email} disabled readOnly />
+              <input id="current-email" type="email" value={admin?.email ?? ''} disabled readOnly />
             </div>
 
             <label className="field-label" htmlFor="new-email">
@@ -131,6 +160,7 @@ export function Settings() {
                 value={newEmail}
                 onChange={(e) => setNewEmail(e.target.value)}
                 autoComplete="email"
+                disabled={emailLoading}
               />
             </div>
 
@@ -145,6 +175,7 @@ export function Settings() {
                 value={emailPassword}
                 onChange={(e) => setEmailPassword(e.target.value)}
                 autoComplete="current-password"
+                disabled={emailLoading}
               />
               <button
                 type="button"
@@ -162,8 +193,8 @@ export function Settings() {
               </p>
             )}
 
-            <button type="submit" className="settings-submit">
-              Update email
+            <button type="submit" className="settings-submit" disabled={emailLoading}>
+              {emailLoading ? 'Updating…' : 'Update email'}
             </button>
           </form>
         </section>
@@ -191,6 +222,7 @@ export function Settings() {
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 autoComplete="current-password"
+                disabled={passwordLoading}
               />
               <button
                 type="button"
@@ -213,6 +245,7 @@ export function Settings() {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 autoComplete="new-password"
+                disabled={passwordLoading}
               />
               <button
                 type="button"
@@ -235,6 +268,7 @@ export function Settings() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 autoComplete="new-password"
+                disabled={passwordLoading}
               />
               <button
                 type="button"
@@ -252,8 +286,8 @@ export function Settings() {
               </p>
             )}
 
-            <button type="submit" className="settings-submit">
-              Update password
+            <button type="submit" className="settings-submit" disabled={passwordLoading}>
+              {passwordLoading ? 'Updating…' : 'Update password'}
             </button>
           </form>
         </section>

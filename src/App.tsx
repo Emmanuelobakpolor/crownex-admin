@@ -1,4 +1,7 @@
 import { useEffect, useState } from 'react'
+import { logout as apiLogout } from './api/adminApi'
+import type { AdminInfo } from './api/client'
+import { clearStoredAuth, getStoredAuth } from './api/client'
 import { Layout } from './components/Layout'
 import type { PageId } from './data/mockData'
 import { Fees } from './pages/Fees'
@@ -10,14 +13,13 @@ import { Transactions } from './pages/Transactions'
 import { Users } from './pages/Users'
 import './App.css'
 
-const AUTH_KEY = 'crownex_admin_auth'
 const PRELOADER_MS = 2400
 
 function App() {
   const [phase, setPhase] = useState<'preloader' | 'login' | 'app'>('preloader')
   const [preloaderVisible, setPreloaderVisible] = useState(true)
   const [page, setPage] = useState<PageId>('overview')
-  const [adminEmail, setAdminEmail] = useState('admin@crownex.com')
+  const [admin, setAdmin] = useState<AdminInfo | null>(null)
 
   useEffect(() => {
     const hideTimer = window.setTimeout(() => {
@@ -25,14 +27,9 @@ function App() {
     }, PRELOADER_MS)
 
     const nextTimer = window.setTimeout(() => {
-      const saved = sessionStorage.getItem(AUTH_KEY)
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved) as { email?: string }
-          if (parsed.email) setAdminEmail(parsed.email)
-        } catch {
-          /* ignore */
-        }
+      const stored = getStoredAuth()
+      if (stored?.access) {
+        setAdmin(stored.admin)
         setPhase('app')
       } else {
         setPhase('login')
@@ -45,14 +42,17 @@ function App() {
     }
   }, [])
 
-  function handleLogin(email: string) {
-    setAdminEmail(email)
-    sessionStorage.setItem(AUTH_KEY, JSON.stringify({ email }))
+  function handleLogin(loggedInAdmin: AdminInfo) {
+    setAdmin(loggedInAdmin)
     setPhase('app')
   }
 
   function handleLogout() {
-    sessionStorage.removeItem(AUTH_KEY)
+    apiLogout().catch(() => {
+      // Session is cleared locally regardless of whether the blacklist call succeeds.
+    })
+    clearStoredAuth()
+    setAdmin(null)
     setPage('overview')
     setPhase('login')
   }
@@ -77,16 +77,19 @@ function App() {
       active={page}
       onNavigate={setPage}
       showRateField={showRateField}
-      adminEmail={adminEmail}
+      adminEmail={admin?.email ?? ''}
       onLogout={handleLogout}
     >
       {page === 'overview' && (
-        <Overview onViewAllTransactions={() => setPage('transaction')} />
+        <Overview
+          onViewAllTransactions={() => setPage('transaction')}
+          onViewAllUsers={() => setPage('users')}
+        />
       )}
       {page === 'users' && <Users />}
       {page === 'transaction' && <Transactions />}
       {page === 'fees' && <Fees />}
-      {page === 'settings' && <Settings />}
+      {page === 'settings' && <Settings admin={admin} onProfileUpdated={setAdmin} />}
     </Layout>
   )
 }

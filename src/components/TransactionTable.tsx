@@ -1,9 +1,9 @@
-import type { Transaction } from '../data/mockData'
+import type { AdminTransaction } from '../api/types'
+import { formatNgn } from '../utils/format'
 import { StatusBadge, TypeBadge } from './Badges'
 
 interface Props {
-  rows: Transaction[]
-  typeVariant?: 'default' | 'pink'
+  rows: AdminTransaction[]
   title?: string
   viewAllColor?: 'green' | 'purple'
   onViewAll?: () => void
@@ -11,7 +11,6 @@ interface Props {
 
 export function TransactionTable({
   rows,
-  typeVariant = 'default',
   title = 'Recent Transactions',
   viewAllColor = 'green',
   onViewAll,
@@ -28,31 +27,37 @@ export function TransactionTable({
         <table className="data-table">
           <thead>
             <tr>
-              <th>ID</th>
+              <th>Reference</th>
               <th>Type</th>
               <th>User</th>
-              <th>Asset</th>
+              <th>Description</th>
               <th>Amount</th>
-              <th>Fee</th>
               <th>Status</th>
             </tr>
           </thead>
           <tbody>
-            {rows.map((row, i) => (
-              <tr key={`${row.id}-${row.type}-${i}`}>
-                <td className="cell-muted">{row.id}</td>
-                <td>
-                  <TypeBadge type={row.type} variant={typeVariant} />
-                </td>
-                <td>{row.user}</td>
-                <td className="cell-asset">{row.asset}</td>
-                <td>{row.amount}</td>
-                <td>{row.fee}</td>
-                <td>
-                  <StatusBadge status={row.status} />
+            {rows.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="cell-muted">
+                  No transactions yet.
                 </td>
               </tr>
-            ))}
+            ) : (
+              rows.map((row) => (
+                <tr key={row.id}>
+                  <td className="cell-muted">{row.reference}</td>
+                  <td>
+                    <TypeBadge type={row.type} />
+                  </td>
+                  <td>{row.user_name}</td>
+                  <td className="cell-asset">{row.description}</td>
+                  <td>{formatNgn(row.amount)}</td>
+                  <td>
+                    <StatusBadge status={row.status} />
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

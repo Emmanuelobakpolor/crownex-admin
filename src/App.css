@@ -803,6 +803,15 @@
   padding: 3px 8px;
 }
 
+.pct-down {
+  font-size: 12px;
+  font-weight: 600;
+  color: #d64545;
+  background: #fdeceb;
+  border-radius: 999px;
+  padding: 3px 8px;
+}
+
 .month-select {
   display: inline-flex;
   align-items: center;
@@ -1020,6 +1029,11 @@
 .users-count-bar {
   padding: 18px 20px 14px;
   border-bottom: 1px solid #eef0f5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
 .users-count-bar p {
@@ -1029,6 +1043,19 @@
 
 .users-count-bar strong {
   font-weight: 700;
+}
+
+.users-search {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid #e3e6ee;
+  font-size: 13px;
+  min-width: 220px;
+  outline: none;
+}
+
+.users-search:focus {
+  border-color: #22a06b;
 }
 
 .users-table-card {

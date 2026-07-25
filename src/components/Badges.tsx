@@ -1,24 +1,39 @@
-import type { TxStatus, TxType } from '../data/mockData'
+import type { TransactionCategory } from '../api/types'
 
-export function TypeBadge({ type, variant = 'default' }: { type: TxType; variant?: 'default' | 'pink' }) {
-  const className =
-    type === 'Swap'
-      ? variant === 'pink'
-        ? 'badge badge-swap-pink'
-        : 'badge badge-swap'
-      : type === 'Deposit'
-        ? 'badge badge-deposit'
-        : 'badge badge-withdrawal'
-
-  return <span className={className}>{type}</span>
+const TYPE_LABELS: Record<TransactionCategory, string> = {
+  deposit: 'Deposit',
+  withdrawal: 'Withdrawal',
+  airtime: 'Airtime',
+  data: 'Data',
+  cable: 'Cable TV',
+  electricity: 'Electricity',
+  giftcard: 'Gift Card',
 }
 
-export function StatusBadge({ status }: { status: TxStatus | 'Active' | 'Inactive' }) {
-  const isOk = status === 'Completed' || status === 'Active'
+const TYPE_CLASSES: Record<TransactionCategory, string> = {
+  deposit: 'badge-deposit',
+  withdrawal: 'badge-withdrawal',
+  airtime: 'badge-swap',
+  data: 'badge-swap',
+  cable: 'badge-swap',
+  electricity: 'badge-swap',
+  giftcard: 'badge-swap-pink',
+}
+
+export function TypeBadge({ type }: { type: TransactionCategory }) {
+  const className = TYPE_CLASSES[type] ?? 'badge-swap'
+  return <span className={`badge ${className}`}>{TYPE_LABELS[type] ?? type}</span>
+}
+
+const OK_STATUSES = new Set(['completed', 'success', 'active'])
+
+export function StatusBadge({ status }: { status: string }) {
+  const isOk = OK_STATUSES.has(status.toLowerCase())
+  const label = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()
   return (
     <span className={`badge status-badge ${isOk ? 'status-ok' : 'status-other'}`}>
       <span className="status-dot" />
-      {status}
+      {label}
     </span>
   )
 }

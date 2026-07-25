@@ -1,14 +1,11 @@
 import { useState, type FormEvent } from 'react'
+import { login } from '../api/adminApi'
+import type { AdminInfo } from '../api/client'
+import { ApiError } from '../api/client'
 import { IconEye, IconEyeOff, IconLock, IconMail } from '../components/Icons'
 
-/** Sample hardcoded admin credentials (frontend only) */
-export const DEMO_ADMIN = {
-  email: 'admin@crownex.com',
-  password: 'admin123',
-}
-
 interface Props {
-  onLogin: (email: string) => void
+  onLogin: (admin: AdminInfo) => void
 }
 
 export function Login({ onLogin }: Props) {
@@ -18,7 +15,7 @@ export function Login({ onLogin }: Props) {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
-  function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setError(null)
 
@@ -28,21 +25,14 @@ export function Login({ onLogin }: Props) {
     }
 
     setLoading(true)
-
-    // Simulate a short auth delay
-    window.setTimeout(() => {
-      const emailOk = email.trim().toLowerCase() === DEMO_ADMIN.email
-      const passOk = password === DEMO_ADMIN.password
-
-      if (!emailOk || !passOk) {
-        setError('Invalid email or password. Use the demo credentials below.')
-        setLoading(false)
-        return
-      }
-
-      onLogin(email.trim().toLowerCase())
+    try {
+      const admin = await login(email.trim(), password)
+      onLogin(admin)
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Something went wrong. Please try again.')
+    } finally {
       setLoading(false)
-    }, 700)
+    }
   }
 
   return (
@@ -117,30 +107,6 @@ export function Login({ onLogin }: Props) {
             )}
           </button>
         </form>
-
-        <div className="login-demo">
-          <p className="login-demo-title">Demo credentials</p>
-          <div className="login-demo-row">
-            <span>Email</span>
-            <code>{DEMO_ADMIN.email}</code>
-          </div>
-          <div className="login-demo-row">
-            <span>Password</span>
-            <code>{DEMO_ADMIN.password}</code>
-          </div>
-          <button
-            type="button"
-            className="login-fill-btn"
-            onClick={() => {
-              setEmail(DEMO_ADMIN.email)
-              setPassword(DEMO_ADMIN.password)
-              setError(null)
-            }}
-            disabled={loading}
-          >
-            Fill demo details
-          </button>
-        </div>
       </div>
     </div>
   )

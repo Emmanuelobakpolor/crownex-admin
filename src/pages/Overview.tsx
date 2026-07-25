@@ -1,18 +1,62 @@
-import {
-  IconChevronDown,
-  IconFemale,
-  IconMale,
-  IconReceipt,
-  IconUsersCircle,
-} from '../components/Icons'
+import { useEffect, useState } from 'react'
+import { fetchOverview, fetchTransactions } from '../api/adminApi'
+import { ApiError } from '../api/client'
+import type { AdminTransaction, OverviewStats } from '../api/types'
+import { IconFemale, IconMale, IconReceipt, IconUsersCircle } from '../components/Icons'
 import { TransactionTable } from '../components/TransactionTable'
-import { recentTransactions } from '../data/mockData'
+import { formatNgn, formatNumber } from '../utils/format'
 
 interface Props {
   onViewAllTransactions?: () => void
+  onViewAllUsers?: () => void
 }
 
-export function Overview({ onViewAllTransactions }: Props) {
+export function Overview({ onViewAllTransactions, onViewAllUsers }: Props) {
+  const [stats, setStats] = useState<OverviewStats | null>(null)
+  const [recent, setRecent] = useState<AdminTransaction[]>([])
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+    setError(null)
+
+    Promise.all([fetchOverview(), fetchTransactions({ page_size: 6 })])
+      .then(([overview, transactions]) => {
+        if (cancelled) return
+        setStats(overview)
+        setRecent(transactions.results)
+      })
+      .catch((err: unknown) => {
+        if (cancelled) return
+        setError(err instanceof ApiError ? err.message : 'Failed to load dashboard data.')
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="overview-page">
+        <p className="cell-muted">Loading dashboard…</p>
+      </div>
+    )
+  }
+
+  if (error || !stats) {
+    return (
+      <div className="overview-page">
+        <p className="login-error">{error ?? 'Something went wrong.'}</p>
+      </div>
+    )
+  }
+
   return (
     <div className="overview-page">
       <div className="stat-row">
@@ -23,16 +67,18 @@ export function Overview({ onViewAllTransactions }: Props) {
             </span>
             <div>
               <p className="stat-label">Total Users</p>
-              <p className="stat-value">
-                <span className="currency-n">N</span> 5 234
-              </p>
+              <p className="stat-value">{stats.total_users.toLocaleString()}</p>
             </div>
           </div>
           <div className="stat-footer">
-            <button type="button" className="link-muted">
+            <button type="button" className="link-muted" onClick={onViewAllUsers}>
               View All &gt;
             </button>
-            <span className="pct-up">↑ 10.0%</span>
+            {stats.new_users_growth_pct !== null && (
+              <span className={stats.new_users_growth_pct >= 0 ? 'pct-up' : 'pct-down'}>
+                {stats.new_users_growth_pct >= 0 ? '↑' : '↓'} {Math.abs(stats.new_users_growth_pct)}%
+              </span>
+            )}
           </div>
         </article>
 
@@ -43,16 +89,13 @@ export function Overview({ onViewAllTransactions }: Props) {
             </span>
             <div>
               <p className="stat-label">Total Deposit Today</p>
-              <p className="stat-value">
-                <span className="currency-n">N</span> 2 215
-              </p>
+              <p className="stat-value">{formatNgn(stats.deposit_today_ngn)}</p>
             </div>
           </div>
           <div className="stat-footer">
-            <button type="button" className="link-muted">
+            <button type="button" className="link-muted" onClick={onViewAllTransactions}>
               View All &gt;
             </button>
-            <span className="pct-up">↑ 10.0%</span>
           </div>
         </article>
 
@@ -62,17 +105,12 @@ export function Overview({ onViewAllTransactions }: Props) {
               <IconFemale />
             </span>
             <div>
-              <p className="stat-label">NGN Deposit</p>
-              <p className="stat-value">
-                <span className="currency-n">N</span> 2 215
-              </p>
+              <p className="stat-label">All-Time Deposits</p>
+              <p className="stat-value">{formatNgn(stats.deposit_all_time_ngn)}</p>
             </div>
           </div>
           <div className="stat-footer">
-            <button type="button" className="link-muted">
-              View All &gt;
-            </button>
-            <span className="pct-up">↑ 10.0%</span>
+            <span className="cell-muted">{stats.deposit_count} total deposits</span>
           </div>
         </article>
 
@@ -83,39 +121,32 @@ export function Overview({ onViewAllTransactions }: Props) {
             </span>
             <div>
               <p className="stat-label">Total Withdrawal</p>
-              <p className="stat-value">
-                <span className="currency-n">N</span> 1789
-              </p>
+              <p className="stat-value">{formatNgn(stats.withdrawal_all_time_ngn)}</p>
             </div>
           </div>
           <div className="stat-footer">
-            <button type="button" className="link-muted">
-              View All &gt;
-            </button>
-            <button type="button" className="month-select">
-              Month <IconChevronDown />
-            </button>
+            <span className="cell-muted">{stats.withdrawal_count} total withdrawals</span>
           </div>
         </article>
       </div>
 
       <div className="amount-row">
         <article className="card amount-card">
-          <p className="amount-label">Total Swapped Cryptpo</p>
+          <p className="amount-label">VTU Purchases (Airtime &amp; Data)</p>
           <p className="amount-value">
-            200,500.00 <span className="amount-unit">$</span>
+            {formatNumber(stats.vtu_total_ngn)} <span className="amount-unit">NGN</span>
           </p>
         </article>
         <article className="card amount-card">
-          <p className="amount-label">Total Crypto Withdrawals</p>
+          <p className="amount-label">Gift Card Purchases</p>
           <p className="amount-value">
-            100,500.00 <span className="amount-unit">USD</span>
+            {formatNumber(stats.giftcard_total_ngn)} <span className="amount-unit">NGN</span>
           </p>
         </article>
       </div>
 
       <TransactionTable
-        rows={recentTransactions}
+        rows={recent}
         title="Recent Transactions"
         viewAllColor="green"
         onViewAll={onViewAllTransactions}
