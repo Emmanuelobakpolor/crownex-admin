@@ -29,6 +29,7 @@ export interface AdminUser {
   name: string
   email: string
   phone: string | null
+  profile_picture: string | null
   balance_ngn: string
   status: 'Active' | 'Inactive'
   is_verified: boolean

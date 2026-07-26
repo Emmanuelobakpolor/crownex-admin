@@ -2,6 +2,7 @@ import { type AdminInfo, apiClient, clearStoredAuth, getStoredAuth, setStoredAut
 import type {
   AdminCryptoOrder,
   AdminCryptoWithdrawal,
+  AdminUser,
   CryptoFeeSetting,
   LoginResponse,
   OverviewStats,
@@ -44,6 +45,10 @@ export function fetchUsers(
   params: { search?: string; page?: number; page_size?: number } = {},
 ): Promise<PaginatedUsers> {
   return apiClient.request<PaginatedUsers>('/api/admin/users/', { params })
+}
+
+export function fetchUserDetail(id: number): Promise<AdminUser> {
+  return apiClient.request<AdminUser>(`/api/admin/users/${id}/`)
 }
 
 export function fetchTransactions(

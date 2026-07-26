@@ -3,6 +3,8 @@ import { fetchUsers } from '../api/adminApi'
 import { ApiError } from '../api/client'
 import type { AdminUser } from '../api/types'
 import { StatusBadge } from '../components/Badges'
+import { UserAvatar } from '../components/UserAvatar'
+import { UserDetailModal } from '../components/UserDetailModal'
 import { formatNgn, timeAgo } from '../utils/format'
 
 export function Users() {
@@ -11,6 +13,7 @@ export function Users() {
   const [search, setSearch] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -87,11 +90,26 @@ export function Users() {
                 </tr>
               ) : (
                 users.map((user) => (
-                  <tr key={user.id}>
+                  <tr
+                    key={user.id}
+                    className="user-row"
+                    onClick={() => setSelectedUser(user)}
+                    tabIndex={0}
+                    role="button"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        setSelectedUser(user)
+                      }
+                    }}
+                  >
                     <td>
                       <div className="user-cell">
-                        <span className="user-name">{user.name}</span>
-                        <span className="user-email">{user.email}</span>
+                        <UserAvatar name={user.name} src={user.profile_picture} size={36} />
+                        <div className="user-cell-meta">
+                          <span className="user-name">{user.name}</span>
+                          <span className="user-email">{user.email}</span>
+                        </div>
                       </div>
                     </td>
                     <td>{formatNgn(user.balance_ngn)}</td>
@@ -106,6 +124,14 @@ export function Users() {
           </table>
         </div>
       </section>
+
+      {selectedUser && (
+        <UserDetailModal
+          userId={selectedUser.id}
+          initial={selectedUser}
+          onClose={() => setSelectedUser(null)}
+        />
+      )}
     </div>
   )
 }

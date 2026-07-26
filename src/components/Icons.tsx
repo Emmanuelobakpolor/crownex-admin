@@ -202,6 +202,51 @@ export function IconPercent(props: IconProps) {
   )
 }
 
+export function IconPhone(props: IconProps) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" {...props}>
+      <path
+        d="M6.6 10.8c1.4 2.8 3.8 5.2 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.4 21 3 13.6 3 4.9c0-.6.4-1 1-1h3.4c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.5.1.4 0 .8-.2 1L6.6 10.8Z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+export function IconCalendar(props: IconProps) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" {...props}>
+      <rect x="3.5" y="5" width="17" height="15.5" rx="2" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M3.5 9.5h17M8 3v3.5M16 3v3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+export function IconWallet(props: IconProps) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" {...props}>
+      <rect x="3" y="6.5" width="18" height="12.5" rx="2.5" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M3 10h18" stroke="currentColor" strokeWidth="1.8" />
+      <circle cx="16.5" cy="14.3" r="1.3" fill="currentColor" />
+    </svg>
+  )
+}
+
+export function IconBadgeCheck(props: IconProps) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" {...props}>
+      <path
+        d="m9 12 2 2 4-4M12 3l2.2 1.3 2.6-.2 1 2.4 2.4 1-.2 2.6L21.3 12l-1.3 2.2.2 2.6-2.4 1-1 2.4-2.6-.2L12 21.3l-2.2-1.3-2.6.2-1-2.4-2.4-1 .2-2.6L2.7 12l1.3-2.2-.2-2.6 2.4-1 1-2.4 2.6.2L12 3Z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
 export function IconClose(props: IconProps) {
   return (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" {...props}>
