@@ -159,3 +159,32 @@ export interface PaginatedCryptoWithdrawals {
   num_pages: number
   results: AdminCryptoWithdrawal[]
 }
+
+export type KycStatus = 'pending' | 'approved' | 'rejected' | 'review'
+
+export interface AdminKycVerification {
+  id: number
+  user_email: string
+  id_type: string
+  id_number: string
+  full_name: string
+  date_of_birth: string
+  address: string
+  selfie: string | null
+  id_document: string | null
+  dojah_reference_id: string
+  match_score: string | null
+  status: KycStatus
+  reviewer_note: string
+  created_at: string
+  updated_at: string
+  logs: CryptoLogEntry[]
+}
+
+export interface PaginatedKycVerifications {
+  count: number
+  page: number
+  page_size: number
+  num_pages: number
+  results: AdminKycVerification[]
+}

@@ -6,6 +6,7 @@ import { Layout } from './components/Layout'
 import type { PageId } from './data/mockData'
 import { CryptoOps } from './pages/CryptoOps'
 import { Fees } from './pages/Fees'
+import { Kyc } from './pages/Kyc'
 import { Login } from './pages/Login'
 import { Overview } from './pages/Overview'
 import { Preloader } from './pages/Preloader'
@@ -90,6 +91,7 @@ function App() {
       {page === 'users' && <Users />}
       {page === 'transaction' && <Transactions />}
       {page === 'crypto' && <CryptoOps />}
+      {page === 'kyc' && <Kyc />}
       {page === 'fees' && <Fees />}
       {page === 'settings' && <Settings admin={admin} onProfileUpdated={setAdmin} />}
     </Layout>

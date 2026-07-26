@@ -2,12 +2,14 @@ import { type AdminInfo, apiClient, clearStoredAuth, getStoredAuth, setStoredAut
 import type {
   AdminCryptoOrder,
   AdminCryptoWithdrawal,
+  AdminKycVerification,
   AdminUser,
   CryptoFeeSetting,
   LoginResponse,
   OverviewStats,
   PaginatedCryptoOrders,
   PaginatedCryptoWithdrawals,
+  PaginatedKycVerifications,
   PaginatedTransactions,
   PaginatedUsers,
 } from './types'
@@ -125,5 +127,22 @@ export function actOnCryptoWithdrawal(
   return apiClient.request(`/api/admin/crypto/withdrawals/${reference}/`, {
     method: 'POST',
     body: { action, ...extra },
+  })
+}
+
+export function fetchKycVerifications(
+  params: { status?: string; search?: string; page?: number; page_size?: number } = {},
+): Promise<PaginatedKycVerifications> {
+  return apiClient.request('/api/admin/kyc/', { params })
+}
+
+export function actOnKycVerification(
+  id: number,
+  action: 'approve' | 'reject',
+  note?: string,
+): Promise<AdminKycVerification> {
+  return apiClient.request(`/api/admin/kyc/${id}/`, {
+    method: 'POST',
+    body: { action, note },
   })
 }

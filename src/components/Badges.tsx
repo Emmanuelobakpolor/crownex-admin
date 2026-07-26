@@ -25,7 +25,7 @@ export function TypeBadge({ type }: { type: TransactionCategory }) {
   return <span className={`badge ${className}`}>{TYPE_LABELS[type] ?? type}</span>
 }
 
-const OK_STATUSES = new Set(['completed', 'success', 'active'])
+const OK_STATUSES = new Set(['completed', 'success', 'active', 'approved'])
 
 export function StatusBadge({ status }: { status: string }) {
   const isOk = OK_STATUSES.has(status.toLowerCase())

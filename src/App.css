@@ -1825,3 +1825,28 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.kyc-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.kyc-detail-meta p {
+  font-size: 13px;
+  color: #374151;
+  margin-bottom: 4px;
+}
+
+.kyc-detail-images {
+  display: flex;
+  gap: 12px;
+}
+
+.kyc-detail-thumb {
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #dfe2ea;
+}

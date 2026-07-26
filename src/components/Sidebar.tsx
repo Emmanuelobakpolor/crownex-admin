@@ -1,11 +1,20 @@
 import type { PageId } from '../data/mockData'
-import { IconCube, IconDatabase, IconGrid, IconReceipt, IconSettings, IconTag } from './Icons'
+import {
+  IconBadgeCheck,
+  IconCube,
+  IconDatabase,
+  IconGrid,
+  IconReceipt,
+  IconSettings,
+  IconTag,
+} from './Icons'
 
 const nav: { id: PageId; label: string; icon: typeof IconGrid }[] = [
   { id: 'overview', label: 'Overview', icon: IconGrid },
   { id: 'users', label: 'Users', icon: IconCube },
   { id: 'transaction', label: 'Transaction', icon: IconDatabase },
   { id: 'crypto', label: 'Crypto Ops', icon: IconReceipt },
+  { id: 'kyc', label: 'KYC Review', icon: IconBadgeCheck },
   { id: 'fees', label: 'Fees', icon: IconTag },
   { id: 'settings', label: 'Settings', icon: IconSettings },
 ]
