@@ -12,6 +12,7 @@ import type {
   PaginatedKycVerifications,
   PaginatedTransactions,
   PaginatedUsers,
+  PaginatedVirtualCards,
 } from './types'
 
 export async function login(email: string, password: string): Promise<AdminInfo> {
@@ -145,4 +146,10 @@ export function actOnKycVerification(
     method: 'POST',
     body: { action, note },
   })
+}
+
+export function fetchVirtualCards(
+  params: { status?: string; search?: string; page?: number; page_size?: number } = {},
+): Promise<PaginatedVirtualCards> {
+  return apiClient.request('/api/admin/cards/', { params })
 }

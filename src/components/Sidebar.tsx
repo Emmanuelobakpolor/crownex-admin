@@ -7,6 +7,7 @@ import {
   IconReceipt,
   IconSettings,
   IconTag,
+  IconWallet,
 } from './Icons'
 
 const nav: { id: PageId; label: string; icon: typeof IconGrid }[] = [
@@ -15,6 +16,7 @@ const nav: { id: PageId; label: string; icon: typeof IconGrid }[] = [
   { id: 'transaction', label: 'Transaction', icon: IconDatabase },
   { id: 'crypto', label: 'Crypto Ops', icon: IconReceipt },
   { id: 'kyc', label: 'KYC Review', icon: IconBadgeCheck },
+  { id: 'cards', label: 'Virtual Cards', icon: IconWallet },
   { id: 'fees', label: 'Fees', icon: IconTag },
   { id: 'settings', label: 'Settings', icon: IconSettings },
 ]

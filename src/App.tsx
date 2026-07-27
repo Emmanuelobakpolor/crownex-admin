@@ -4,6 +4,7 @@ import type { AdminInfo } from './api/client'
 import { clearStoredAuth, getStoredAuth } from './api/client'
 import { Layout } from './components/Layout'
 import type { PageId } from './data/mockData'
+import { Cards } from './pages/Cards'
 import { CryptoOps } from './pages/CryptoOps'
 import { Fees } from './pages/Fees'
 import { Kyc } from './pages/Kyc'
@@ -92,6 +93,7 @@ function App() {
       {page === 'transaction' && <Transactions />}
       {page === 'crypto' && <CryptoOps />}
       {page === 'kyc' && <Kyc />}
+      {page === 'cards' && <Cards />}
       {page === 'fees' && <Fees />}
       {page === 'settings' && <Settings admin={admin} onProfileUpdated={setAdmin} />}
     </Layout>

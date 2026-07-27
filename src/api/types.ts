@@ -188,3 +188,38 @@ export interface PaginatedKycVerifications {
   num_pages: number
   results: AdminKycVerification[]
 }
+
+export type CardStatus = 'pending' | 'active' | 'frozen' | 'terminated'
+
+export interface AdminCardTransaction {
+  reference: string
+  type: 'funding' | 'withdrawal'
+  status: 'pending' | 'completed' | 'failed'
+  amount_display: string
+  ngn_amount: string | null
+  description: string
+  created_at: string
+}
+
+export interface AdminVirtualCard {
+  id: number
+  user_email: string
+  status: CardStatus
+  created_status: string
+  card_brand: string
+  masked_pan: string
+  cardholder_name: string
+  balance_display: string
+  created_at: string
+  updated_at: string
+  logs: CryptoLogEntry[]
+  transactions: AdminCardTransaction[]
+}
+
+export interface PaginatedVirtualCards {
+  count: number
+  page: number
+  page_size: number
+  num_pages: number
+  results: AdminVirtualCard[]
+}
