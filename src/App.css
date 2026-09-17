@@ -1850,3 +1850,89 @@
   border-radius: 8px;
   border: 1px solid #dfe2ea;
 }
+
+.user-detail-danger {
+  border-top: 1px solid #eef0f5;
+  padding-top: 16px;
+}
+
+.danger-btn {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid #f3c2c2;
+  background: #fff;
+  color: #c0392b;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.danger-btn:hover:not(:disabled) {
+  background: #c0392b;
+  border-color: #c0392b;
+  color: #fff;
+}
+
+.danger-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.danger-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid #f3c2c2;
+  border-radius: 12px;
+  background: #fdf6f6;
+}
+
+.danger-confirm-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #c0392b;
+}
+
+.danger-confirm-text {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #6b7280;
+}
+
+.danger-confirm-warning {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: #b9770e;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #fdf3e0;
+}
+
+.danger-confirm-label {
+  font-size: 12px;
+  color: #4b5563;
+}
+
+.danger-confirm-input {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #dfe2ea;
+  background: #fff;
+  font-size: 13px;
+  color: #1a1d26;
+}
+
+.danger-confirm-input:focus {
+  outline: none;
+  border-color: #c0392b;
+}
+
+.danger-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

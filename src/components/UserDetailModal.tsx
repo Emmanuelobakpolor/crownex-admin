@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { fetchUserDetail } from '../api/adminApi'
+import { deleteUser, fetchUserDetail } from '../api/adminApi'
 import { ApiError } from '../api/client'
 import type { AdminUser } from '../api/types'
 import { formatNgn, timeAgo } from '../utils/format'
@@ -12,12 +12,18 @@ interface UserDetailModalProps {
   userId: number
   initial?: AdminUser
   onClose: () => void
+  onDeleted?: (userId: number) => void
 }
 
-export function UserDetailModal({ userId, initial, onClose }: UserDetailModalProps) {
+export function UserDetailModal({ userId, initial, onClose, onDeleted }: UserDetailModalProps) {
   const [user, setUser] = useState<AdminUser | null>(initial ?? null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(!initial)
+
+  const [confirming, setConfirming] = useState(false)
+  const [confirmText, setConfirmText] = useState('')
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -40,6 +46,23 @@ export function UserDetailModal({ userId, initial, onClose }: UserDetailModalPro
       cancelled = true
     }
   }, [userId])
+
+  const hasBalance = user ? Number(user.balance_ngn) > 0 : false
+  const canDelete = user !== null && confirmText.trim().toLowerCase() === user.email.toLowerCase()
+
+  const handleDelete = async () => {
+    if (!user || !canDelete || deleting) return
+    setDeleting(true)
+    setDeleteError(null)
+    try {
+      await deleteUser(user.id)
+      onDeleted?.(user.id)
+      onClose()
+    } catch (err: unknown) {
+      setDeleteError(err instanceof ApiError ? err.message : 'Failed to delete user.')
+      setDeleting(false)
+    }
+  }
 
   return (
     <Modal title="User details" onClose={onClose}>
@@ -121,6 +144,67 @@ export function UserDetailModal({ userId, initial, onClose }: UserDetailModalPro
                 <span className="user-detail-value">{timeAgo(user.last_active)}</span>
               </div>
             </div>
+          </div>
+
+          <div className="user-detail-danger">
+            {!confirming ? (
+              <button
+                type="button"
+                className="danger-btn"
+                onClick={() => {
+                  setConfirming(true)
+                  setConfirmText('')
+                  setDeleteError(null)
+                }}
+              >
+                Delete user
+              </button>
+            ) : (
+              <div className="danger-confirm">
+                <p className="danger-confirm-title">Permanently delete this user?</p>
+                <p className="danger-confirm-text">
+                  This removes their wallet, transaction history, crypto orders, KYC records and
+                  virtual card. It cannot be undone.
+                </p>
+                {hasBalance && (
+                  <p className="danger-confirm-warning">
+                    This account still holds {formatNgn(user.balance_ngn)}. Those funds and their
+                    ledger will be destroyed.
+                  </p>
+                )}
+                <label className="danger-confirm-label" htmlFor="delete-confirm-input">
+                  Type <strong>{user.email}</strong> to confirm
+                </label>
+                <input
+                  id="delete-confirm-input"
+                  type="text"
+                  className="danger-confirm-input"
+                  value={confirmText}
+                  onChange={(e) => setConfirmText(e.target.value)}
+                  autoComplete="off"
+                  disabled={deleting}
+                />
+                {deleteError && <p className="login-error">{deleteError}</p>}
+                <div className="danger-confirm-actions">
+                  <button
+                    type="button"
+                    className="crypto-ops-action-btn"
+                    onClick={() => setConfirming(false)}
+                    disabled={deleting}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="danger-btn"
+                    onClick={handleDelete}
+                    disabled={!canDelete || deleting}
+                  >
+                    {deleting ? 'Deleting…' : 'Delete permanently'}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

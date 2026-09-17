@@ -54,6 +54,24 @@ export function fetchUserDetail(id: number): Promise<AdminUser> {
   return apiClient.request<AdminUser>(`/api/admin/users/${id}/`)
 }
 
+export interface DeleteUserResponse {
+  message: string
+  deleted: {
+    user_id: number
+    email: string
+    phone: string | null
+    date_joined: string
+    ngn_balance: string
+    transactions: number
+    crypto_orders: number
+    crypto_withdrawals: number
+  }
+}
+
+export function deleteUser(id: number): Promise<DeleteUserResponse> {
+  return apiClient.request<DeleteUserResponse>(`/api/admin/users/${id}/`, { method: 'DELETE' })
+}
+
 export function fetchTransactions(
   params: { type?: string; page?: number; page_size?: number } = {},
 ): Promise<PaginatedTransactions> {

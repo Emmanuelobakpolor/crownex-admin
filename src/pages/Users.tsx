@@ -130,6 +130,10 @@ export function Users() {
           userId={selectedUser.id}
           initial={selectedUser}
           onClose={() => setSelectedUser(null)}
+          onDeleted={(id) => {
+            setUsers((prev) => prev.filter((u) => u.id !== id))
+            setCount((prev) => Math.max(0, prev - 1))
+          }}
         />
       )}
     </div>
