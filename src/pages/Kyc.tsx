@@ -160,7 +160,7 @@ export function Kyc() {
                                   <strong>Address:</strong> {v.address || '—'}
                                 </p>
                                 <p>
-                                  <strong>Dojah reference:</strong> {v.dojah_reference_id || '—'}
+                                  <strong>Reference:</strong> {v.reference_id || '—'}
                                 </p>
                                 {v.reviewer_note && (
                                   <p>

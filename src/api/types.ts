@@ -172,7 +172,7 @@ export interface AdminKycVerification {
   address: string
   selfie: string | null
   id_document: string | null
-  dojah_reference_id: string
+  reference_id: string
   match_score: string | null
   status: KycStatus
   reviewer_note: string
