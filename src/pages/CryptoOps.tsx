@@ -34,7 +34,7 @@ const RESOLVE_CONFIRMATIONS: Partial<Record<CryptoOrderAction, string>> = {
   confirm_not_executed:
     'Only continue if the Quidax master account has NO fill for this order. The user will be refunded / have their crypto released.',
   swap_credit_coin:
-    'The user will be credited the destination coin amount from their quote and the order marked completed. Buy that amount on the Quidax master account so the balance is backed.',
+    "This BUYS the destination coin on the Quidax master account with the NGN from the sell leg, then credits it to the user and completes the order. If Quidax refuses the buy, nothing is credited. Make sure the master account has enough NGN (see Master Account).",
   swap_refund_ngn:
     "The user's NGN wallet will be credited the swap's value minus fee. This can only be done once per order.",
 }
