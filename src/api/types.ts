@@ -117,6 +117,7 @@ export interface AdminCryptoOrder {
   status: CryptoOrderStatus
   quidax_order_id: string
   payment_proof: string | null
+  needs_review: boolean
   note: string
   created_at: string
   updated_at: string

@@ -109,10 +109,21 @@ export function updateCryptoFee(
   return apiClient.request(`/api/admin/fees/${id}/`, { method: 'PATCH', body: payload })
 }
 
+export type CryptoOrderAction =
+  | 'approve'
+  | 'reject'
+  | 'confirm_deposit'
+  | 'retry'
+  | 'confirm_executed'
+  | 'confirm_not_executed'
+  | 'swap_credit_coin'
+  | 'swap_refund_ngn'
+
 export function fetchCryptoOrders(
   params: {
     status?: string
     type?: string
+    needs_review?: string
     search?: string
     page?: number
     page_size?: number
@@ -123,7 +134,7 @@ export function fetchCryptoOrders(
 
 export function actOnCryptoOrder(
   reference: string,
-  action: 'approve' | 'reject' | 'confirm_deposit' | 'retry',
+  action: CryptoOrderAction,
   note?: string,
 ): Promise<AdminCryptoOrder> {
   return apiClient.request(`/api/admin/crypto/orders/${reference}/`, {

@@ -4,6 +4,7 @@ import {
   actOnCryptoWithdrawal,
   fetchCryptoOrders,
   fetchCryptoWithdrawals,
+  type CryptoOrderAction,
 } from '../api/adminApi'
 import { ApiError } from '../api/client'
 import type { AdminCryptoOrder, AdminCryptoWithdrawal } from '../api/types'
@@ -12,8 +13,11 @@ import { formatNgn, formatNumber, timeAgo } from '../utils/format'
 
 type Tab = 'orders' | 'withdrawals'
 
+// 'needs_review' isn't a status: it filters on the needs_review flag
+// (Quidax timed out on the order, so nobody knows yet whether it executed).
 const ORDER_STATUS_FILTERS = [
   'all',
+  'needs_review',
   'pending_payment',
   'payment_received',
   'waiting_deposit',
@@ -24,7 +28,24 @@ const ORDER_STATUS_FILTERS = [
 
 const WITHDRAWAL_STATUS_FILTERS = ['all', 'processing', 'completed', 'failed', 'rejected']
 
-function orderActions(order: AdminCryptoOrder): { action: 'approve' | 'reject' | 'confirm_deposit' | 'retry'; label: string; needsNote?: boolean }[] {
+const RESOLVE_CONFIRMATIONS: Partial<Record<CryptoOrderAction, string>> = {
+  confirm_executed:
+    'Only continue if the Quidax master account order history shows this order FILLED. The order will be completed and the user credited.',
+  confirm_not_executed:
+    'Only continue if the Quidax master account has NO fill for this order. The user will be refunded / have their crypto released.',
+  swap_credit_coin:
+    'The user will be credited the destination coin amount from their quote and the order marked completed. Buy that amount on the Quidax master account so the balance is backed.',
+  swap_refund_ngn:
+    "The user's NGN wallet will be credited the swap's value minus fee. This can only be done once per order.",
+}
+
+function orderActions(order: AdminCryptoOrder): { action: CryptoOrderAction; label: string; needsNote?: boolean }[] {
+  if (order.needs_review) {
+    return [
+      { action: 'confirm_executed', label: 'Executed on Quidax', needsNote: true },
+      { action: 'confirm_not_executed', label: 'Not executed', needsNote: true },
+    ]
+  }
   if (order.status === 'pending_payment') {
     return [
       { action: 'approve', label: 'Approve', needsNote: true },
@@ -39,6 +60,13 @@ function orderActions(order: AdminCryptoOrder): { action: 'approve' | 'reject' |
   }
   if (order.status === 'failed' && order.order_type === 'buy') {
     return [{ action: 'retry', label: 'Retry' }]
+  }
+  if (order.status === 'failed' && order.order_type === 'swap') {
+    // Backend refuses these unless the sell leg actually executed.
+    return [
+      { action: 'swap_credit_coin', label: 'Credit coin', needsNote: true },
+      { action: 'swap_refund_ngn', label: 'Refund NGN', needsNote: true },
+    ]
   }
   return []
 }
@@ -66,7 +94,8 @@ export function CryptoOps() {
     setOrdersLoading(true)
     setOrdersError(null)
     fetchCryptoOrders({
-      status: orderStatus === 'all' ? undefined : orderStatus,
+      status: orderStatus === 'all' || orderStatus === 'needs_review' ? undefined : orderStatus,
+      needs_review: orderStatus === 'needs_review' ? '1' : undefined,
       search: orderSearch || undefined,
       page_size: 50,
     })
@@ -102,9 +131,11 @@ export function CryptoOps() {
 
   async function handleOrderAction(
     order: AdminCryptoOrder,
-    action: 'approve' | 'reject' | 'confirm_deposit' | 'retry',
+    action: CryptoOrderAction,
     needsNote?: boolean,
   ) {
+    const warning = RESOLVE_CONFIRMATIONS[action]
+    if (warning && !window.confirm(`${order.reference}: ${warning}`)) return
     const note = needsNote ? (window.prompt(`Note for "${action}" on ${order.reference} (optional):`) ?? '') : ''
     setActingOrder(order.reference)
     try {
@@ -236,6 +267,7 @@ export function CryptoOps() {
                           <td>{formatNgn(order.total_ngn)}</td>
                           <td>
                             <StatusBadge status={order.status} />
+                            {order.needs_review && <span className="cell-muted"> · needs review</span>}
                           </td>
                           <td className="cell-muted">{timeAgo(order.created_at)}</td>
                           <td onClick={(e) => e.stopPropagation()}>
