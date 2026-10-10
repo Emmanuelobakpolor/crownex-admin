@@ -9,6 +9,7 @@ import { CryptoOps } from './pages/CryptoOps'
 import { Fees } from './pages/Fees'
 import { Kyc } from './pages/Kyc'
 import { Login } from './pages/Login'
+import { MasterBalances } from './pages/MasterBalances'
 import { Overview } from './pages/Overview'
 import { Preloader } from './pages/Preloader'
 import { Settings } from './pages/Settings'
@@ -92,6 +93,7 @@ function App() {
       {page === 'users' && <Users />}
       {page === 'transaction' && <Transactions />}
       {page === 'crypto' && <CryptoOps />}
+      {page === 'master' && <MasterBalances />}
       {page === 'kyc' && <Kyc />}
       {page === 'cards' && <Cards />}
       {page === 'fees' && <Fees />}

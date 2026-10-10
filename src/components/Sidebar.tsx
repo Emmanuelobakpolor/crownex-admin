@@ -15,6 +15,7 @@ const nav: { id: PageId; label: string; icon: typeof IconGrid }[] = [
   { id: 'users', label: 'Users', icon: IconCube },
   { id: 'transaction', label: 'Transaction', icon: IconDatabase },
   { id: 'crypto', label: 'Crypto Ops', icon: IconReceipt },
+  { id: 'master', label: 'Master Account', icon: IconWallet },
   { id: 'kyc', label: 'KYC Review', icon: IconBadgeCheck },
   { id: 'cards', label: 'Virtual Cards', icon: IconWallet },
   { id: 'fees', label: 'Fees', icon: IconTag },

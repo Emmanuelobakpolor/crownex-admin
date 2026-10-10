@@ -6,6 +6,7 @@ import type {
   AdminUser,
   CryptoFeeSetting,
   LoginResponse,
+  MasterBalances,
   OverviewStats,
   PaginatedCryptoOrders,
   PaginatedCryptoWithdrawals,
@@ -181,4 +182,8 @@ export function fetchVirtualCards(
   params: { status?: string; search?: string; page?: number; page_size?: number } = {},
 ): Promise<PaginatedVirtualCards> {
   return apiClient.request('/api/admin/cards/', { params })
+}
+
+export function fetchMasterBalances(): Promise<MasterBalances> {
+  return apiClient.request('/api/admin/crypto/master-balances/')
 }

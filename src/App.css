@@ -1936,3 +1936,28 @@
   justify-content: flex-end;
   gap: 8px;
 }
+
+.master-balances-alert {
+  margin-bottom: 16px;
+}
+
+.master-balances-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.master-balances-short {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.master-balances-ok {
+  color: #16a34a;
+}
+
+.master-balances-footnote {
+  margin-top: 12px;
+  font-size: 12px;
+}

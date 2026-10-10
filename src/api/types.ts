@@ -224,3 +224,21 @@ export interface PaginatedVirtualCards {
   num_pages: number
   results: AdminVirtualCard[]
 }
+
+export interface MasterBalanceRow {
+  coin: string
+  name: string
+  supported: boolean
+  on_quidax: boolean
+  master_balance: string
+  master_locked: string
+  users_available: string
+  users_reserved: string
+  users_total: string
+  difference: string
+}
+
+export interface MasterBalances {
+  fetched_at: string
+  rows: MasterBalanceRow[]
+}
