@@ -37,6 +37,9 @@ const RESOLVE_CONFIRMATIONS: Partial<Record<CryptoOrderAction, string>> = {
     "This BUYS the destination coin on the Quidax master account with the NGN from the sell leg, then credits it to the user and completes the order. If Quidax refuses the buy, nothing is credited. Make sure the master account has enough NGN (see Master Account).",
   swap_refund_ngn:
     "The user's NGN wallet will be credited the swap's value minus fee. This can only be done once per order.",
+  // TEMPORARY
+  swap_convert_ngn:
+    "Takes back the coin the old Credit coin gave this user (it was never bought on Quidax) and credits the swap's NGN value to their NGN wallet instead.",
 }
 
 function orderActions(order: AdminCryptoOrder): { action: CryptoOrderAction; label: string; needsNote?: boolean }[] {
@@ -67,6 +70,17 @@ function orderActions(order: AdminCryptoOrder): { action: CryptoOrderAction; lab
       { action: 'swap_credit_coin', label: 'Credit coin', needsNote: true },
       { action: 'swap_refund_ngn', label: 'Refund NGN', needsNote: true },
     ]
+  }
+  // TEMPORARY — old Credit coin payouts that were never bought on Quidax.
+  const events = order.logs.map((l) => l.event)
+  if (
+    order.status === 'completed' &&
+    order.order_type === 'swap' &&
+    events.includes('admin_swap_compensated') &&
+    !events.includes('admin_swap_buy_started') &&
+    !events.includes('swap_refunded_ngn')
+  ) {
+    return [{ action: 'swap_convert_ngn', label: 'Convert to NGN', needsNote: true }]
   }
   return []
 }

@@ -119,6 +119,7 @@ export type CryptoOrderAction =
   | 'confirm_not_executed'
   | 'swap_credit_coin'
   | 'swap_refund_ngn'
+  | 'swap_convert_ngn' // TEMPORARY
 
 export function fetchCryptoOrders(
   params: {
