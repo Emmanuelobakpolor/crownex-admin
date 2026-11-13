@@ -1,6 +1,7 @@
 import type { PageId } from '../data/mockData'
 import {
   IconBadgeCheck,
+  IconChatDots,
   IconCube,
   IconDatabase,
   IconGrid,
@@ -18,6 +19,7 @@ const nav: { id: PageId; label: string; icon: typeof IconGrid }[] = [
   { id: 'master', label: 'Master Account', icon: IconWallet },
   { id: 'kyc', label: 'KYC Review', icon: IconBadgeCheck },
   { id: 'cards', label: 'Virtual Cards', icon: IconWallet },
+  { id: 'support', label: 'Support Chat', icon: IconChatDots },
   { id: 'fees', label: 'Fees', icon: IconTag },
   { id: 'settings', label: 'Settings', icon: IconSettings },
 ]
@@ -26,9 +28,11 @@ interface Props {
   active: PageId
   onNavigate: (page: PageId) => void
   onLogout?: () => void
+  /** Unread user messages across all support chats. */
+  supportUnread?: number
 }
 
-export function Sidebar({ active, onNavigate, onLogout }: Props) {
+export function Sidebar({ active, onNavigate, onLogout, supportUnread = 0 }: Props) {
   return (
     <aside className="sidebar">
       <div className="sidebar-logo">
@@ -38,6 +42,7 @@ export function Sidebar({ active, onNavigate, onLogout }: Props) {
         {nav.map((item) => {
           const Icon = item.icon
           const isActive = active === item.id
+          const badge = item.id === 'support' ? supportUnread : 0
           return (
             <button
               key={item.id}
@@ -47,6 +52,11 @@ export function Sidebar({ active, onNavigate, onLogout }: Props) {
             >
               <Icon />
               <span>{item.label}</span>
+              {badge > 0 && (
+                <span key={badge} className="nav-badge">
+                  {badge > 99 ? '99+' : badge}
+                </span>
+              )}
             </button>
           )
         })}

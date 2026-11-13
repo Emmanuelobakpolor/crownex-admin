@@ -11,9 +11,12 @@ import type {
   PaginatedCryptoOrders,
   PaginatedCryptoWithdrawals,
   PaginatedKycVerifications,
+  PaginatedSupportConversations,
   PaginatedTransactions,
   PaginatedUsers,
   PaginatedVirtualCards,
+  SupportMessage,
+  SupportThread,
 } from './types'
 
 export async function login(email: string, password: string): Promise<AdminInfo> {
@@ -186,4 +189,39 @@ export function fetchVirtualCards(
 
 export function fetchMasterBalances(): Promise<MasterBalances> {
   return apiClient.request('/api/admin/crypto/master-balances/')
+}
+
+export function fetchSupportConversations(
+  params: { status?: string; search?: string; page?: number; page_size?: number } = {},
+): Promise<PaginatedSupportConversations> {
+  return apiClient.request('/api/admin/support/conversations/', { params })
+}
+
+/** Marks the thread read for the admin team. Pass `after` to get only newer messages. */
+export function fetchSupportThread(id: number, after?: number): Promise<SupportThread> {
+  return apiClient.request(`/api/admin/support/conversations/${id}/`, { params: { after } })
+}
+
+export function sendSupportMessage(id: number, body: string): Promise<SupportMessage> {
+  return apiClient.request(`/api/admin/support/conversations/${id}/messages/`, {
+    method: 'POST',
+    body: { body },
+  })
+}
+
+export function setSupportTyping(id: number, typing: boolean): Promise<void> {
+  return apiClient.request(`/api/admin/support/conversations/${id}/typing/`, {
+    method: 'POST',
+    body: { typing },
+  })
+}
+
+export function setSupportStatus(
+  id: number,
+  status: 'open' | 'resolved',
+): Promise<{ status: 'open' | 'resolved' }> {
+  return apiClient.request(`/api/admin/support/conversations/${id}/status/`, {
+    method: 'POST',
+    body: { status },
+  })
 }

@@ -9,6 +9,7 @@ interface Props {
   showRateField?: boolean
   adminEmail?: string
   onLogout?: () => void
+  supportUnread?: number
   children: ReactNode
 }
 
@@ -18,11 +19,17 @@ export function Layout({
   showRateField,
   adminEmail,
   onLogout,
+  supportUnread,
   children,
 }: Props) {
   return (
     <div className="app-shell">
-      <Sidebar active={active} onNavigate={onNavigate} onLogout={onLogout} />
+      <Sidebar
+        active={active}
+        onNavigate={onNavigate}
+        onLogout={onLogout}
+        supportUnread={supportUnread}
+      />
       <div className="main-column">
         <Header showRateField={showRateField} adminEmail={adminEmail} />
         <main className="page-content">{children}</main>

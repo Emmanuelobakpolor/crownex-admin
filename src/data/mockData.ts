@@ -1,1 +1,11 @@
-export type PageId = 'overview' | 'users' | 'transaction' | 'crypto' | 'master' | 'kyc' | 'cards' | 'fees' | 'settings'
+export type PageId =
+  | 'overview'
+  | 'users'
+  | 'transaction'
+  | 'crypto'
+  | 'master'
+  | 'kyc'
+  | 'cards'
+  | 'support'
+  | 'fees'
+  | 'settings'

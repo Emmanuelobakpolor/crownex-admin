@@ -365,3 +365,33 @@ export function LogoMark() {
     </div>
   )
 }
+
+export function IconChatDots(props: IconProps) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" {...props}>
+      <path
+        d="M20 11.5c0 4.14-3.58 7.5-8 7.5-1.13 0-2.2-.22-3.18-.61L4 19.5l1.15-3.6A7.13 7.13 0 0 1 4 11.5C4 7.36 7.58 4 12 4s8 3.36 8 7.5Z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+      <circle cx="8.5" cy="11.5" r="1.1" fill="currentColor" />
+      <circle cx="12" cy="11.5" r="1.1" fill="currentColor" />
+      <circle cx="15.5" cy="11.5" r="1.1" fill="currentColor" />
+    </svg>
+  )
+}
+
+export function IconSend(props: IconProps) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" {...props}>
+      <path
+        d="M4.5 12 3 4.5l18 7.5-18 7.5L4.5 12Zm0 0H12"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}

@@ -242,3 +242,45 @@ export interface MasterBalances {
   fetched_at: string
   rows: MasterBalanceRow[]
 }
+
+export type SupportSender = 'user' | 'admin'
+
+export interface SupportMessage {
+  id: number
+  sender_type: SupportSender
+  sender_name: string
+  body: string
+  created_at: string
+}
+
+export interface SupportConversation {
+  id: number
+  user: {
+    id: number
+    email: string
+    full_name: string
+    phone: string
+    profile_picture: string | null
+  }
+  status: 'open' | 'resolved'
+  last_message: { body: string; sender_type: SupportSender } | null
+  last_message_at: string | null
+  unread_count: number
+  user_is_typing: boolean
+  user_last_read_at: string | null
+  created_at: string
+}
+
+export interface PaginatedSupportConversations {
+  count: number
+  page: number
+  page_size: number
+  num_pages: number
+  unread_total: number
+  results: SupportConversation[]
+}
+
+export interface SupportThread {
+  conversation: SupportConversation
+  messages: SupportMessage[]
+}

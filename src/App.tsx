@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { logout as apiLogout } from './api/adminApi'
+import { logout as apiLogout, fetchSupportConversations } from './api/adminApi'
 import type { AdminInfo } from './api/client'
 import { clearStoredAuth, getStoredAuth } from './api/client'
 import { Layout } from './components/Layout'
@@ -13,6 +13,7 @@ import { MasterBalances } from './pages/MasterBalances'
 import { Overview } from './pages/Overview'
 import { Preloader } from './pages/Preloader'
 import { Settings } from './pages/Settings'
+import { Support } from './pages/Support'
 import { Transactions } from './pages/Transactions'
 import { Users } from './pages/Users'
 import './App.css'
@@ -24,6 +25,26 @@ function App() {
   const [preloaderVisible, setPreloaderVisible] = useState(true)
   const [page, setPage] = useState<PageId>('overview')
   const [admin, setAdmin] = useState<AdminInfo | null>(null)
+  const [supportUnread, setSupportUnread] = useState(0)
+
+  // Keep the sidebar's Support badge fresh on every page.
+  useEffect(() => {
+    if (phase !== 'app') return
+    let cancelled = false
+    function refresh() {
+      fetchSupportConversations({ page_size: 1 })
+        .then((data) => {
+          if (!cancelled) setSupportUnread(data.unread_total)
+        })
+        .catch(() => {})
+    }
+    refresh()
+    const timer = window.setInterval(refresh, 8000)
+    return () => {
+      cancelled = true
+      window.clearInterval(timer)
+    }
+  }, [phase])
 
   useEffect(() => {
     const hideTimer = window.setTimeout(() => {
@@ -83,6 +104,7 @@ function App() {
       showRateField={showRateField}
       adminEmail={admin?.email ?? ''}
       onLogout={handleLogout}
+      supportUnread={supportUnread}
     >
       {page === 'overview' && (
         <Overview
@@ -96,6 +118,7 @@ function App() {
       {page === 'master' && <MasterBalances />}
       {page === 'kyc' && <Kyc />}
       {page === 'cards' && <Cards />}
+      {page === 'support' && <Support onUnreadChange={setSupportUnread} />}
       {page === 'fees' && <Fees />}
       {page === 'settings' && <Settings admin={admin} onProfileUpdated={setAdmin} />}
     </Layout>
